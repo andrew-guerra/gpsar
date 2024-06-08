@@ -5,23 +5,37 @@ import java.nio.file.Path;
 
 import io.jenetics.jpx.GPX;
 
+/**
+ * An Art object reprents GPS art that will be rendered into a GPX file.
+ */
 public class Art {
-    public void render(String filename) throws IOException{
-        final GPX gpx = GPX.builder().addTrack(track -> track
-        .addSegment(segment -> segment
-        .addPoint(p -> p.lat(44.977649).lon(-93.224717))
-        .addPoint(p -> p.lat(44.977655).lon(-93.224428))
-        .addPoint(p -> p.lat(44.97765).lon(-93.224215))
-        .addPoint(p -> p.lat(44.97763).lon(-93.223971))
-        .addPoint(p -> p.lat(44.977625).lon(-93.22394))
-        ))
-        .build();
+    private final Coordinates position;
+    private final Coordinates[] coordinates;
 
-        GPX.write(gpx, Path.of(filename));
+    /**
+     * Constructs an Art object with a position and a list of coordinates.
+     * 
+     * @param position The position of the GPS art
+     * @param coordinates The coordinates that make up the GPS art
+     */
+    public Art(Coordinates position, Coordinates[] coordinates) {
+        this.position = position;
+        this.coordinates = coordinates;
     }
 
-    public static void main(String[] args) throws IOException {
-        Art art = new Art();
-        art.render("test.gpx");
+    /**
+     * Renders the Art object into a GPX file with filename.
+     * 
+     * @param filename File name of rendered GPX file
+     * @throws IOException If GPX file is not properly written
+     */
+    public void render(String filename) throws IOException {
+        final GPX gpx = GPX.builder().addTrack(track -> track.addSegment(segment -> {
+            for(Coordinates point : coordinates) {
+                segment.addPoint(p -> p.lat(point.latitude).lon(point.longitude));
+            }
+        })).build();
+
+        GPX.write(gpx, Path.of(filename));
     }
 }
